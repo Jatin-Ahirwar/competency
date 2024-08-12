@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+.svgbg{
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+}
+.content{
+    position: absolute;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50% , -50%);
+}
+
+.startext{
+    color: #41A8ED;
+    background-color: white;
+    transition: all ease .5s;
+}
+.startext:hover{
+    border: 1px solid white;
+    background-color:transparent;
+    color: white;
+}
+
+:where(.css-dev-only-do-not-override-1c0na6j).ant-steps .ant-steps-item-process .ant-steps-item-icon {
+    background-color: #43A1CC;
+    border-color: #43A1CC;
+}
+:where(.css-dev-only-do-not-override-1c0na6j).ant-btn-primary {
+    background: #43A1CC;
+}
+
+@media (max-width: 850px) {
+    .phonesize {
+      display: flex !important;
+    }
+    .screensize {
+      display: none !important;
+    }
+}
+@media (max-width: 450px) {
+    .hiddenbtn{
+        display: flex;
+    }
+    .startext{
+        display: none;
+    }
+    .content{
+        top: 43%;
+    }
+    .litteralogo{
+        height: 3.5vh !important;
+    }
+    
+}
