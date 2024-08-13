@@ -4,11 +4,14 @@ import App from './App.jsx'
 import './index.css'
 
 import { BrowserRouter } from 'react-router-dom'
+import { EmpoloyeProvider } from './EmpContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <EmpoloyeProvider>
+        <App />
+      </EmpoloyeProvider>
     </BrowserRouter>
   </StrictMode>,
 )

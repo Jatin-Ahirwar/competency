@@ -1,13 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Steps, Form, Input, Radio, Button, Select } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CloseOutlined } from '@ant-design/icons';
+import litteralogo from '../../assets/litteralogo.png'
+import axios from '../../../AxiosInstance/axios.jsx'
+import { v4 as uuidv4 } from 'uuid'
+import { UseEmploye } from '../../EmpContext.jsx';
 
 
 const { Step } = Steps;
 
 const Activity = ({ activities, onAddActivity, onDeleteActivity, onNext }) => {
 const [inputValue, setInputValue] = useState("");
+const { uuid , setuuid } = UseEmploye()
+
+  const GetActivity = async()=>{
+    try {
+      const headers = {
+        Accept:'application/json , text/plain',
+        APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+        'Content-Type':'application/json'
+      }
+      const { data } = await axios.get(`/Get_Frac_Emp_Activity` , { 
+        headers:headers , 
+        params:{
+          employeeid:uuid,
+          branchid:import.meta.env.VITE_BRANCH_ID
+        }
+      })
+      console.log( "Get_Frac_Emp_Activity" , data)
+    } 
+    catch (error) {
+      console.log(error)
+    }
+  }
 
   const handleAddActivity = () => {
     if (inputValue.trim()) {
@@ -16,9 +42,49 @@ const [inputValue, setInputValue] = useState("");
     }
   };
 
+  const handleSaveAndNext = async () => {
+    try {
+      console.log("activities" , activities)
+      await EmployeActivityHandler({ activities });
+      onNext(); 
+    } catch (error) {
+      console.error("Error saving activities:", error);
+    }
+  };
+
+  const EmployeActivityHandler = async (values) => {
+    try {
+      const headers = {
+        Accept: 'application/json, text/plain',
+        APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+        'Content-Type': 'application/json',
+      };
+  
+      const activities = values?.map((value, index) => ({
+        activityid: index,
+        activity: value,
+      }));
+  
+      const { data } = await axios.get(`/Save_Fracking_EMP_Activity`, {
+        headers: headers,
+        params: {
+          tcfea_id: null,
+          tcfea_tcfem_id: uuid,
+          activities: activities,
+          tcfea_branchid: import.meta.env.VITE_BRANCH_ID,
+        },
+      });
+  
+      await GetActivity()
+      console.log("Save_activity", data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
   return (
     <div className="max-mid:px-2 h-full px-8">
-      <h2 className="text-2xl  py-2 my-3">Activity</h2>
+      <h2 className="text-2xl gap-2 items-center max-sm:flex-col flex  py-2 my-3">Activity <span className='text-sm'>( कृपया बताएं कि आप अपनी संस्था में क्या काम करते हैं ? )</span></h2>
       <div className="flex space-x-4 mb-4">
         <Input
           value={inputValue}
@@ -43,7 +109,7 @@ const [inputValue, setInputValue] = useState("");
         ))}
       </div>
       {activities.length > 0 && (
-        <Button type="primary" className="mt-4 bg-[#43A1CC]" onClick={onNext}>
+        <Button type="primary" className="mt-4 bg-[#43A1CC]" onClick={handleSaveAndNext}>
           Save & Next
         </Button>
       )}
@@ -54,19 +120,78 @@ const [inputValue, setInputValue] = useState("");
 
 const KnowledgeAndResource = ({ activities, onFinish }) => {
     const [textareaValues, setTextareaValues] = useState(Array(activities.length).fill(''));
-  
-    // Handle changes in textarea
+    const { uuid , setuuid } = UseEmploye()
+
+    useEffect(()=>{
+      const fetchActivity = async()=>{
+        await GetActivity()
+      }
+      fetchActivity()
+    },[])
+    
     const handleChange = (index, value) => {
       const newValues = [...textareaValues];
       newValues[index] = value;
       setTextareaValues(newValues);
     };
+    
+    const EmployeResourceHandler = async (values) => {
+      try {
+        const headers = {
+          Accept: 'application/json, text/plain',
+          APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+          'Content-Type': 'application/json',
+        };
+    
+        const activities = values?.map((value, index) => ({
+          activityid: index,
+          resources: value,
+          resourceid: string,
+        }));
+    
+        const { data } = await axios.get(`/Save_Fracking_EMP_Activity`, {
+          headers: headers,
+          params: {
+            tcfea_id: null,
+            tcfea_tcfem_id: uuid,
+            activities: activities,
+            tcfekr_branchid: import.meta.env.VITE_BRANCH_ID,
+          },
+        });
+    
+        console.log("Save_activity", data);
+      } 
+      catch (error) {
+        console.log(error);
+      }
+    };
+
+    const GetActivity = async()=>{
+      try {
+        const headers = {
+          Accept:'application/json , text/plain',
+          APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+          'Content-Type':'application/json'
+        }
+        const { data } = await axios.get(`/Get_Frac_Emp_Activity` , { 
+          headers:headers , 
+          params:{
+            employeeid:uuid,
+            branchid:import.meta.env.VITE_BRANCH_ID
+          }
+        })
+        console.log( "Get_Frac_Emp_Activity" , data)
+      } 
+      catch (error) {
+        console.log(error)
+      }
+    }
   
     const allTextareasFilled = textareaValues.every(value => value.trim() !== '');
   
     return (
       <div className="max-sm:px-4 px-8">
-        <h2 className="text-2xl py-4">Knowledge & Resource</h2>
+        <h2 className="text-2xl gap-2 items-center max-sm:flex-col flex  py-2 my-3">Knowledge & Resource <span className='text-sm max-sm:text-xs text-center'>( कृपया बताएं कि आपके काम करने के लिए आपको किस प्रकार के ज्ञान की आवश्यकता होती है ? )</span></h2>
         {activities.map((activity, index) => (
           <div key={index} className="mb-4 flex gap-2 flex-col">
             <h3 className="capitalize text-sm font-light">{index + 1}. Resources for : {activity}</h3>
@@ -89,18 +214,78 @@ const KnowledgeAndResource = ({ activities, onFinish }) => {
         </Button>
       </div>
     );
-  };
+};
 
 
 const MyForm = ({ onNext }) => {
   const [form] = Form.useForm();
+  const { uuid , setuuid } = UseEmploye()
 
-  const onFinish = (values) => {
+  const onFinish = async(values) => {
     console.log('Form values:', values);
+    await EmployeInfoHandler(values)
     form.resetFields();
     onNext();
   };
 
+  const GetCaste = async()=>{
+    try {
+      const headers = {
+        Accept:'application/json , text/plain',
+        APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+        'Content-Type':'application/json'
+      }
+      const { data } = await axios.get(`/Get_cast_category` , { 
+        headers:headers
+      })
+      console.log( "Get_cast_category" , data)
+    } 
+    catch (error) {
+      console.log(error)
+    }
+
+  }
+
+  const EmployeInfoHandler = async(values)=>{
+    try {
+      const headers = {
+        Accept:'application/json , text/plain',
+        APIKey: import.meta.env.VITE_LITTERA_APIKEY,
+        'Content-Type':'application/json'
+      }
+      const newUserid = uuidv4()
+      setuuid(setuuid)
+
+      const { data } = await axios.get(`/Save_Fracking_EMP` , { 
+        headers:headers,
+        params:{
+          tcfem_id: newUserid,
+          tcfem_f_name: values.firstName,
+          tcfem_m_name: values.middleName || null ,
+          tcfem_l_name: values.lastName || null ,
+          tcfem_gender: 0,
+          tcfem_cast_category: 0,
+          tcfem_mobileno: values.mobileNo ,
+          tcfem_email: values.email,
+          tcfem_post: values.designation,
+          tcfem_branchid: import.meta.env.VITE_BRANCH_ID,  
+        } 
+      })
+      console.log( "Get_cast_category" , data)
+    } 
+    catch (error) {
+      console.log(error)
+    }
+
+  }
+
+  useEffect(() => {
+    const fetchdata = async()=>{
+      await GetCaste()
+    }
+    fetchdata()
+  }, [])
+  
   const [value, setValue] = useState('male');
 
   const handleChange = (e) => {
@@ -127,15 +312,18 @@ const MyForm = ({ onNext }) => {
             >
                 <Input placeholder="First Name" />
             </Form.Item>
+
             <Form.Item name="middleName" noStyle>
                 <Input placeholder="Middle Name" />
             </Form.Item>
+            
             <Form.Item
                 name="lastName"
                 noStyle
             >
                 <Input placeholder="Last Name" />
             </Form.Item>
+
             </div>
         </Form.Item>
 
@@ -144,20 +332,19 @@ const MyForm = ({ onNext }) => {
             name="gender"
             rules={[{ required: true, message: 'Please select your gender!' }]}
         >
-            {/* <Radio.Group value={value} defaultValue={"male"} onChange={handleChange}> */}
             <Radio.Group>
-                <Radio value="male">Male</Radio>
-                <Radio value="female">Female</Radio>
-                <Radio value="other">Other</Radio>
+                <Radio value="0">Male</Radio>
+                <Radio value="1">Female</Radio>
+                <Radio value="2">Other</Radio>
             </Radio.Group>
         </Form.Item>
 
         <Form.Item label="Caste" name="caste">
             <Select placeholder="Select your caste">
-            <Select.Option value="sc">SC</Select.Option>
-            <Select.Option value="st">ST</Select.Option>
-            <Select.Option value="obc">OBC</Select.Option>
-            <Select.Option value="general">General</Select.Option>
+            <Select.Option value="0">SC</Select.Option>
+            <Select.Option value="1">ST</Select.Option>
+            <Select.Option value="2">OBC</Select.Option>
+            <Select.Option value="3">General</Select.Option>
             </Select>
         </Form.Item>
 
@@ -198,9 +385,9 @@ const MyForm = ({ onNext }) => {
         </Form.Item>
         </Form>
     </div>
-
   );
 };
+
 
 const ActivityContainer = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -224,7 +411,20 @@ const ActivityContainer = () => {
   };
 
   return (
-    <div className="flex max-mid:px-4 max-sm:px-2 max-sm:py-2  max-lg:px-10  px-32">
+    <div className="flex flex-col h-[100vh] ">
+      <div className="w-full max-sm:py-0 px-6 p-4">
+        <Link
+          className='flex px-3 cursor-none' to="">
+          <img 
+            className='max-sm:hidden h-[5vh] object-cover max-mid:pb-0 py-1' 
+            src={litteralogo} 
+            alt="" 
+          />
+        </Link>
+      </div>
+
+
+    <div className='max-mid:px-4 max-sm:px-2 max-sm:py-2  max-lg:px-10  px-32'>
       <div className="flex max-sm:py-0 max-mid:h-[87vh] max-sm:h-[98vh] max-mid:flex-col w-full rounded-lg overflow-hidden bg-white mt-6 max-mid:mt-0 h-[80vh]">
         
         <div className="flex  max-mid:gap-2 max-mid:w-full pt-4 gap-6 flex-col items-center justify-center w-1/4  bg-gray-100">
@@ -258,7 +458,6 @@ const ActivityContainer = () => {
         </div>
 
         <div className="w-3/4  max-mid:overflow-y-auto h-full  max-mid:w-full py-4 bg-white shadow-lg ">
-        {/* <div className="w-3/4 h-full max-mid:w-full py-4 bg-white shadow-lg "> */}
           {currentStep === 0 && <MyForm onNext={handleNext} />}
           {currentStep === 1 && (
             <Activity
@@ -276,6 +475,7 @@ const ActivityContainer = () => {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 };
